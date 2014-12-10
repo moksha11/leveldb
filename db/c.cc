@@ -299,14 +299,17 @@ unsigned char leveldb_iter_valid(const leveldb_iterator_t* iter) {
 }
 
 void leveldb_iter_seek_to_first(leveldb_iterator_t* iter) {
+  fprintf(stdout, "leveldb_iter_seek_to_first");
   iter->rep->SeekToFirst();
 }
 
 void leveldb_iter_seek_to_last(leveldb_iterator_t* iter) {
+  fprintf(stdout, "leveldb_iter_seek_to_last");
   iter->rep->SeekToLast();
 }
 
 void leveldb_iter_seek(leveldb_iterator_t* iter, const char* k, size_t klen) {
+	fprintf(stdout, "leveldb_iter_seek");
   iter->rep->Seek(Slice(k, klen));
 }
 

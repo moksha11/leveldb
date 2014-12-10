@@ -874,6 +874,10 @@ Status VersionSet::LogAndApply(VersionEdit* edit, port::Mutex* mu) {
     mu->Lock();
   }
 
+  if (!s.ok()) {
+	  assert(0);
+  }
+
   // Install the new version
   if (s.ok()) {
     AppendVersion(v);

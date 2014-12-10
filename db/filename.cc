@@ -134,7 +134,10 @@ Status SetCurrentFile(Env* env, const std::string& dbname,
   Status s = WriteStringToFileSync(env, contents.ToString() + "\n", tmp);
   if (s.ok()) {
     s = env->RenameFile(tmp, CurrentFileName(dbname));
-  }
+#ifdef  _USE_NVM
+    //fprintf(stdout,"src %s dest %s \n", tmp.c_str(), CurrentFileName(dbname).c_str());	
+#endif
+     }
   if (!s.ok()) {
     env->DeleteFile(tmp);
   }

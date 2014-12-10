@@ -116,6 +116,7 @@ class LogTest {
               writer_(&dest_),
               reader_(&source_, &report_, true/*checksum*/,
                       0/*initial_offset*/) {
+	  fprintf(stdout,"Starting LogTest");
   }
 
   void Write(const std::string& msg) {

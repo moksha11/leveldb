@@ -48,7 +48,11 @@ Status Table::Open(const Options& options,
   Slice footer_input;
   Status s = file->Read(size - Footer::kEncodedLength, Footer::kEncodedLength,
                         &footer_input, footer_space);
-  if (!s.ok()) return s;
+  if (!s.ok()) {
+	  s = file->Read(size - Footer::kEncodedLength, Footer::kEncodedLength,
+	                          &footer_input, footer_space);
+	  return s;
+  }
 
   Footer footer;
   s = footer.DecodeFrom(&footer_input);
@@ -65,6 +69,8 @@ Status Table::Open(const Options& options,
     s = ReadBlock(file, opt, footer.index_handle(), &contents);
     if (s.ok()) {
       index_block = new Block(contents);
+    }else {
+    	fprintf(stdout,"error reading the file \n");
     }
   }
 

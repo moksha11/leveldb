@@ -7,9 +7,9 @@
 # to switch between compilation modes.
 
 # (A) Production use (optimized mode)
-OPT ?= -O2 -DNDEBUG
+#OPT ?= -O2 -DNDEBUG
 # (B) Debug mode, w/ full line-level debugging symbols
-# OPT ?= -g2
+OPT ?= -g2
 # (C) Profiling mode: opt, but w/debugging symbols
 # OPT ?= -O2 -g2 -DNDEBUG
 #-----------------------------------------------
@@ -23,8 +23,9 @@ include build_config.mk
 CFLAGS += -I. -I./include $(PLATFORM_CCFLAGS) $(OPT)
 CXXFLAGS += -I. -I./include $(PLATFORM_CXXFLAGS) $(OPT)
 
-LDFLAGS += $(PLATFORM_LDFLAGS)
-LIBS += $(PLATFORM_LIBS)
+LDFLAGS += $(PLATFORM_LDFLAGS) 
+LIBS += $(PLATFORM_LIBS) -lnvmchkpt 
+
 
 LIBOBJECTS = $(SOURCES:.cc=.o)
 MEMENVOBJECTS = $(MEMENV_SOURCES:.cc=.o)
@@ -97,7 +98,7 @@ $(SHARED3):
 
 endif  # PLATFORM_SHARED_EXT
 
-all: $(SHARED) $(LIBRARY)
+all: $(SHARED) $(LIBRARY) $(PROGRAMS)
 
 check: all $(PROGRAMS) $(TESTS)
 	for t in $(TESTS); do echo "***** Running $$t"; ./$$t || exit 1; done

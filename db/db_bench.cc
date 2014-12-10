@@ -18,6 +18,12 @@
 #include "util/random.h"
 #include "util/testutil.h"
 
+#define _USE_NVM
+#ifdef _USE_NVM
+#include <nv_map.h>
+#include <c_io.h>
+#endif
+
 // Comma-separated list of operations to run in the specified order
 //   Actual benchmarks:
 //      fillseq       -- write N values in sequential key order in async mode
@@ -44,20 +50,20 @@ static const char* FLAGS_benchmarks =
     "fillseq,"
     "fillsync,"
     "fillrandom,"
-    "overwrite,"
-    "readrandom,"
-    "readrandom,"  // Extra run to allow previous compactions to quiesce
-    "readseq,"
-    "readreverse,"
-    "compact,"
-    "readrandom,"
-    "readseq,"
-    "readreverse,"
-    "fill100K,"
+    //"overwrite,"
+    //"readrandom,"
+    //"readrandom,"  // Extra run to allow previous compactions to quiesce
+	//"readseq,"
+    //"readreverse,"
+    //"compact,"
+    //"readrandom,"
+    //"readseq,"
+    //"readreverse,"
+    /*"fill100K,"
     "crc32c,"
     "snappycomp,"
     "snappyuncomp,"
-    "acquireload,"
+    "acquireload,"*/
     ;
 
 // Number of key/values to place in database
@@ -697,7 +703,7 @@ class Benchmark {
     options.filter_policy = filter_policy_;
     Status s = DB::Open(options, FLAGS_db, &db_);
     if (!s.ok()) {
-      fprintf(stderr, "open error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "db/db_bench.cc open error: %s\n", s.ToString().c_str());
       exit(1);
     }
   }
@@ -734,6 +740,7 @@ class Benchmark {
       s = db_->Write(write_options_, &batch);
       if (!s.ok()) {
         fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+        assert(0);
         exit(1);
       }
     }

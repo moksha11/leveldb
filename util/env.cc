@@ -68,6 +68,9 @@ Status WriteStringToFileSync(Env* env, const Slice& data,
 Status ReadFileToString(Env* env, const std::string& fname, std::string* data) {
   data->clear();
   SequentialFile* file;
+
+  //fprintf(stderr,"ReadFileToString fname %s\n",fname.c_str());
+
   Status s = env->NewSequentialFile(fname, &file);
   if (!s.ok()) {
     return s;
@@ -80,6 +83,9 @@ Status ReadFileToString(Env* env, const std::string& fname, std::string* data) {
     if (!s.ok()) {
       break;
     }
+
+    //fprintf(stdout, "fragment.data() %s \n", fragment.data());	
+
     data->append(fragment.data(), fragment.size());
     if (fragment.empty()) {
       break;
