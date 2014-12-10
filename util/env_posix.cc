@@ -69,6 +69,7 @@ public:
 	void *pvptr;
 	void *base_address;
 	size_t base_length;
+	size_t nvmoffset;
 
 
 	NVMSequentialFile(const std::string& fname, int readflag) :
@@ -98,7 +99,6 @@ public:
 			returned_partial_ = true;
 			return Status::Corruption("read error");
 		}
-
 #endif
 		*result = Slice(reinterpret_cast<char*>(pvptr), n);
 		//fprintf(stderr,"read address %lu\n", (unsigned long)pvptr);
@@ -118,7 +118,8 @@ public:
 		ptr = (unsigned long)pvptr;
 		ptr = ptr + slice.size();
 		pvptr = (void *)ptr;
-		//fprintf(stderr,"write address %lu\n", (unsigned long)pvptr);
+		nvmoffset = nvmoffset + slice.size();
+		//fprintf(stderr,"write address %lu nvmoffset %u\n", (unsigned long)pvptr, nvmoffset);
 		return Status::OK();
 	}
 

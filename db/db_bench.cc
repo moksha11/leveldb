@@ -49,8 +49,8 @@
 static const char* FLAGS_benchmarks =
     "fillseq,"
     "fillsync,"
-    "fillrandom,"
-    "overwrite,"
+    //"fillrandom,"
+    //"overwrite,"
     //"readrandom,"
     //"readrandom,"  // Extra run to allow previous compactions to quiesce
 	//"readseq,"
@@ -59,7 +59,7 @@ static const char* FLAGS_benchmarks =
     //"readrandom,"
     //"readseq,"
     //"readreverse,"
-    "fill100K,"
+    //"fill100K,"
     /*"crc32c,"
     "snappycomp,"
     "snappyuncomp,"
