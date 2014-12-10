@@ -1181,7 +1181,7 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* my_batch) {
 	Writer* last_writer = &w;
 
 	if (!status.ok()) {
-		assert(0);
+		//assert(0);
 	}
 
 	if (status.ok() && my_batch != NULL) {  // NULL batch is for compactions
