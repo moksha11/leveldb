@@ -503,6 +503,7 @@ class DBTest {
   }
 };
 
+#if 0
 TEST(DBTest, Empty) {
   do {
     ASSERT_TRUE(db_ != NULL);
@@ -576,6 +577,7 @@ TEST(DBTest, GetSnapshot) {
   } while (ChangeOptions());
 }
 
+
 TEST(DBTest, GetLevel0Ordering) {
   do {
     // Check that we process level-0 files in correct order.  The code
@@ -617,6 +619,7 @@ TEST(DBTest, GetPicksCorrectFile) {
     ASSERT_EQ("vx", Get("x"));
   } while (ChangeOptions());
 }
+
 
 TEST(DBTest, GetEncountersEmptyLevel) {
   do {
@@ -847,14 +850,14 @@ TEST(DBTest, IterMultiWithDelete) {
     delete iter;
   } while (ChangeOptions());
 }
+#endif
 
 TEST(DBTest, Recover) {
   do {
     ASSERT_OK(Put("foo", "v1"));
-    ASSERT_OK(Put("baz", "v5"));
-
     Reopen();
     ASSERT_EQ("v1", Get("foo"));
+    /*ASSERT_OK(Put("baz", "v5"));
 
     ASSERT_EQ("v1", Get("foo"));
     ASSERT_EQ("v5", Get("baz"));
@@ -866,10 +869,12 @@ TEST(DBTest, Recover) {
     ASSERT_OK(Put("foo", "v4"));
     ASSERT_EQ("v4", Get("foo"));
     ASSERT_EQ("v2", Get("bar"));
-    ASSERT_EQ("v5", Get("baz"));
+    ASSERT_EQ("v5", Get("baz"));*/
   } while (ChangeOptions());
+  fprintf(stdout,"succeed\n");
 }
 
+#if 0
 TEST(DBTest, RecoveryWithEmptyLog) {
   do {
     ASSERT_OK(Put("foo", "v1"));
@@ -881,6 +886,8 @@ TEST(DBTest, RecoveryWithEmptyLog) {
     ASSERT_EQ("v3", Get("foo"));
   } while (ChangeOptions());
 }
+
+
 
 // Check that writes done during a memtable compaction are recovered
 // if the database is shutdown during the memtable compaction.
@@ -904,6 +911,7 @@ TEST(DBTest, RecoverDuringMemtableCompaction) {
     ASSERT_EQ(std::string(1000, 'y'), Get("big2"));
   } while (ChangeOptions());
 }
+#endif
 
 static std::string Key(int i) {
   char buf[100];
@@ -911,6 +919,7 @@ static std::string Key(int i) {
   return std::string(buf);
 }
 
+#if 0
 TEST(DBTest, MinorCompactionsHappen) {
   Options options = CurrentOptions();
   options.write_buffer_size = 10000;
@@ -1044,6 +1053,7 @@ TEST(DBTest, SparseMerge) {
   dbfull()->TEST_CompactRange(1, NULL, NULL);
   ASSERT_LE(dbfull()->TEST_MaxNextLevelOverlappingBytes(), 20*1048576);
 }
+#endif
 
 static bool Between(uint64_t val, uint64_t low, uint64_t high) {
   bool result = (val >= low) && (val <= high);
@@ -1055,6 +1065,8 @@ static bool Between(uint64_t val, uint64_t low, uint64_t high) {
   }
   return result;
 }
+
+#if 0
 
 TEST(DBTest, ApproximateSizes) {
   do {
@@ -1365,6 +1377,8 @@ TEST(DBTest, L0_CompactionBug_Issue44_b) {
   ASSERT_EQ("(->)(c->cv)", Contents());
 }
 
+
+
 TEST(DBTest, ComparatorCheck) {
   class NewComparator : public Comparator {
    public:
@@ -1477,6 +1491,8 @@ TEST(DBTest, ManualCompaction) {
   ASSERT_EQ("0,0,1", FilesPerLevel());
 }
 
+
+
 TEST(DBTest, DBOpen_Options) {
   std::string dbname = test::TmpDir() + "/db_options_test";
   DestroyDB(dbname, Options());
@@ -1521,6 +1537,7 @@ TEST(DBTest, Locking) {
   Status s = DB::Open(CurrentOptions(), dbname_, &db2);
   ASSERT_TRUE(!s.ok()) << "Locking did not prevent re-opening db";
 }
+
 
 // Check that number of files does not grow when we are out of space
 TEST(DBTest, NoSpace) {
@@ -1725,6 +1742,7 @@ TEST(DBTest, BloomFilter) {
   delete options.block_cache;
   delete options.filter_policy;
 }
+#endif
 
 // Multi-threaded test:
 namespace {
@@ -1744,6 +1762,7 @@ struct MTThread {
   MTState* state;
   int id;
 };
+
 
 static void MTThreadBody(void* arg) {
   MTThread* t = reinterpret_cast<MTThread*>(arg);
@@ -1792,6 +1811,7 @@ static void MTThreadBody(void* arg) {
 
 }  // namespace
 
+#if 0
 TEST(DBTest, MultiThreaded) {
   do {
     // Initialize state
@@ -1823,6 +1843,7 @@ TEST(DBTest, MultiThreaded) {
     }
   } while (ChangeOptions());
 }
+#endif
 
 namespace {
 typedef std::map<std::string, std::string> KVMap;
@@ -1985,6 +2006,7 @@ static bool CompareIterators(int step,
   return ok;
 }
 
+#if 0
 TEST(DBTest, Randomized) {
   Random rnd(test::RandomSeed());
   do {
@@ -2055,6 +2077,7 @@ TEST(DBTest, Randomized) {
     if (db_snap != NULL) db_->ReleaseSnapshot(db_snap);
   } while (ChangeOptions());
 }
+#endif
 
 std::string MakeKey(unsigned int num) {
   char buf[30];
@@ -2117,10 +2140,11 @@ void BM_LogAndApply(int iters, int num_base_files) {
 
 int main(int argc, char** argv) {
   if (argc > 1 && std::string(argv[1]) == "--benchmark") {
-    leveldb::BM_LogAndApply(1000, 1);
-    leveldb::BM_LogAndApply(1000, 100);
+	  leveldb::BM_LogAndApply(1, 1);
+	  /*leveldb::BM_LogAndApply(1000, 1);
+	leveldb::BM_LogAndApply(1000, 100);
     leveldb::BM_LogAndApply(1000, 10000);
-    leveldb::BM_LogAndApply(100, 100000);
+    leveldb::BM_LogAndApply(100, 100000);*/
     return 0;
   }
 

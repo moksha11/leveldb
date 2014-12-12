@@ -80,7 +80,7 @@ public:
 
 		if(!readflag){
 			unsigned long ref;
-			base_length = 1024*1024*10;
+			base_length = 1024*1024*4;
 			base_address = nvalloc_(base_length, (char *)fname.c_str(), 0);
 			pvptr=base_address;
 			//fprintf(stderr,"nv_objname %s, address %lu\n",nv_objname, (unsigned long)base_address);
@@ -408,6 +408,7 @@ public:
 			nvmwritefile = new NVMSequentialFile(fname, 0);
 		}
 #endif
+		fprintf(stdout,"WritableFile %s\n",fname.c_str());
 	}
 
 	~PosixWritableFile() {
