@@ -408,7 +408,7 @@ public:
 			nvmwritefile = new NVMSequentialFile(fname, 0);
 		}
 #endif
-		fprintf(stdout,"WritableFile %s\n",fname.c_str());
+		//fprintf(stdout,"WritableFile %s\n",fname.c_str());
 	}
 
 	~PosixWritableFile() {
@@ -628,6 +628,7 @@ public:
 
 #ifdef _USE_NVM
 		if(check_if_enable(fname.c_str())) {
+			FILE* f = fopen(fname.c_str(), "w");
 			*result =  new PosixWritableFile(fname, NULL);
 			return s;
 		}
@@ -656,6 +657,7 @@ public:
 		struct dirent* entry;
 		while ((entry = readdir(d)) != NULL) {
 			result->push_back(entry->d_name);
+			//fprintf(stdout, "GetChildren: filename %s\n", entry->d_name);
 		}
 		closedir(d);
 		return Status::OK();

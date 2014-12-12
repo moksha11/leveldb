@@ -327,10 +327,15 @@ Status DBImpl::Recover(VersionEdit* edit) {
 		for (size_t i = 0; i < filenames.size(); i++) {
 			if (ParseFileName(filenames[i], &number, &type)) {
 				expected.erase(number);
-				if (type == kLogFile && ((number >= min_log) || (number == prev_log)))
+				if (type == kLogFile && ((number >= min_log) || (number == prev_log))) {
 					logs.push_back(number);
+					fprintf(stdout,"Logfile %s \n", filenames[i].c_str());
+				}
 			}
+			//fprintf(stdout,"Logfile %s \n", filenames[i].c_str());
 		}
+		fprintf(stdout,"------------\n");
+
 		if (!expected.empty()) {
 			char buf[50];
 			snprintf(buf, sizeof(buf), "%d missing files; e.g.",
@@ -341,6 +346,8 @@ Status DBImpl::Recover(VersionEdit* edit) {
 		// Recover in the order in which the logs were generated
 		std::sort(logs.begin(), logs.end());
 		for (size_t i = 0; i < logs.size(); i++) {
+
+			//fprintf(stdout,"Logfile %s \n", logs[i].c_str());
 			s = RecoverLogFile(logs[i], edit, &max_sequence);
 
 			// The previous incarnation may not have written any MANIFEST
