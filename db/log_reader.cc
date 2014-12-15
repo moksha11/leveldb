@@ -211,6 +211,7 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result) {
     const uint32_t b = static_cast<uint32_t>(header[5]) & 0xff;
     const unsigned int type = header[6];
     const uint32_t length = a | (b << 8);
+
     if (kHeaderSize + length > buffer_.size()) {
       size_t drop_size = buffer_.size();
       buffer_.clear();

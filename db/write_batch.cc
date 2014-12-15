@@ -135,7 +135,7 @@ Status WriteBatchInternal::InsertInto(const WriteBatch* b,
 
 void WriteBatchInternal::SetContents(WriteBatch* b, const Slice& contents) {
   assert(contents.size() >= kHeader);
-  b->rep_.assign(contents.data(), contents.size());
+    b->rep_.assign(contents.data(), contents.size());
 }
 
 void WriteBatchInternal::Append(WriteBatch* dst, const WriteBatch* src) {
