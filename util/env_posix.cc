@@ -25,7 +25,6 @@
 #include "util/posix_logger.h"
 
 //#define _NVMDEBUG
-
 #define _USE_NVM
 #ifdef _USE_NVM
 #include <nv_map.h>
@@ -42,7 +41,9 @@ static Status IOError(const std::string& context, int err_number) {
 
 static int check_if_enable(const char *fname) {
 
-	if( strstr(fname,".log") || strstr(fname,".ldb") )
+	if( strstr(fname,".log") || strstr(fname,".ldb")
+		|| strstr(fname, "MANIFEST") || strstr(fname, "CURRENT")
+		|| strstr(fname, ".dbtmp"))
 		return 1;
 	else
 		return 0;
@@ -84,30 +85,38 @@ public:
 		strcpy(nv_objname, (char *)fname.c_str());
 		nvmwriteoff = 0;
 		nvmreadoff = 0;
+		//fprintf(stderr,"creating nv_objname %s\n",nv_objname);
+
 
 		if(!readflag){
 			unsigned long ref;
 			base_length = 1024*1024*4;
 			base_address = nvalloc_(base_length, (char *)fname.c_str(), 0);
-//#ifdef _NVMDEBUG
+#ifdef _NVMDEBUG
 			fprintf(stderr,"creating nv_objname %s, address %lu\n",nv_objname, (unsigned long)base_address);
-//#endif
+#endif
 		}else{
 			base_address = nvread_len((char *)fname.c_str(), 0, &base_length);
 			nvmwriteoff = base_length;
+#ifdef _NVMDEBUG
+			fprintf(stderr,"nvread_len nv_objname %s, address %lu\n",nv_objname, (unsigned long)base_address);
+			fprintf(stderr,"creating nvmwriteoff %u\n",nvmwriteoff);
+#endif
 		}
 	}
 
 	virtual Status Read(size_t n, Slice* result, char* scratch) {
 
 		if(!nvmwriteoff) {
-			force_error_ = true;
+			//force_error_ = true;
+			returned_partial_ = true;
 			return s;
 		}
 
 		if( nvmreadoff >= nvmwriteoff) {
 			n = 0;
-			force_error_ = true;
+			//force_error_ = true;
+			returned_partial_ = true;
 			return s;
 		}
 
@@ -119,7 +128,7 @@ public:
 		*result = Slice(reinterpret_cast<char*>(base_address + nvmreadoff ), n);
 		nvmreadoff= nvmreadoff +n;
 		return Status::OK();
-		//fprintf(stderr,"nvm write obj %s %lu nvmwriteoff \n", nv_objname,  nvmreadoff);
+
 	}
 
 	virtual Status Close() { return Status::OK(); }
@@ -163,9 +172,9 @@ public:
 : filename_(fname), file_(f) {
 
 #ifdef _USE_NVM
-		if(check_if_enable(filename_.c_str())) {
-			nvmseqfile = new NVMSequentialFile(fname, readflag);
-		}
+		//if(check_if_enable(filename_.c_str())) {
+		nvmseqfile = new NVMSequentialFile(fname, readflag);
+		//}
 #endif
 	}
 	virtual ~PosixSequentialFile() {
@@ -180,7 +189,6 @@ public:
 #ifdef _USE_NVM
 		if(check_if_enable(filename_.c_str())) {
 			if(nvmseqfile) {
-
 				Slice* temp = result;
 				s =nvmseqfile->Read(n, result, scratch);
 				if(nvmseqfile->force_error_ == true)
@@ -285,7 +293,7 @@ public:
 : filename_(fname), fd_(fd) {
 
 #ifdef _USE_NVM
-		if(!readflag && check_if_enable(filename_.c_str())) {
+		if(check_if_enable(filename_.c_str())) {
 			nvmrandfile = new NVMRandomNVMFile(fname);
 		}
 #endif
@@ -436,13 +444,14 @@ public:
 : filename_(fname), file_(f) {
 
 #ifdef _USE_NVM
-		if(check_if_enable(fname.c_str())) {
-			nvmwritefile = new NVMSequentialFile(fname, 0);
-		}
+		//if(check_if_enable(fname.c_str())) {
+		nvmwritefile = new NVMSequentialFile(fname, 0);
+		//}
 #endif
 	}
 
 	~PosixWritableFile() {
+
 		if (file_ != NULL) {
 			// Ignoring any potential errors
 			fclose(file_);
@@ -481,8 +490,8 @@ public:
 	virtual Status Close() {
 		Status result;
 #ifdef _USE_NVM
-		//if(check_if_enable(filename_.c_str()))
-		//return result;
+		if(check_if_enable(filename_.c_str()))
+		return result;
 #endif
 		if (fclose(file_) != 0) {
 			result = IOError(filename_, errno);
@@ -497,6 +506,7 @@ public:
 #ifdef _USE_NVM
 		//commit data here
 		//DeleteFile(filename_);
+		return Status::OK();
 #else
 		if (fflush_unlocked(file_) != 0) {
 			return IOError(filename_, errno);
@@ -601,10 +611,11 @@ public:
 			SequentialFile** result) {
 
 #ifdef _USE_NVM
-		if(check_if_enable(fname.c_str())){
-			*result = new PosixSequentialFile(fname, NULL, 1);
-			return Status::OK();
-		}
+		//if(check_if_enable(fname.c_str())){
+		*result = new PosixSequentialFile(fname, NULL, 1);
+		//return Status::OK();
+		//}
+		return Status::OK();
 #endif
 
 		FILE* f = fopen(fname.c_str(), "r");
@@ -624,10 +635,10 @@ public:
 		Status s;
 
 #ifdef _USE_NVM
-		if(check_if_enable(fname.c_str())){
-			*result = new PosixRandomAccessFile(fname, -1, 0);
-			return s;
-		}
+		//if(check_if_enable(fname.c_str())){
+		*result = new PosixRandomAccessFile(fname, -1, 0);
+		return s;
+		//}
 #endif
 		int fd = open(fname.c_str(), O_RDONLY);
 		if (fd < 0) {
@@ -665,14 +676,19 @@ public:
 			//return s;
 		}
 #endif
+
+#ifdef _NVMDEBUG
 		if(check_if_enable(fname.c_str()))
-			fprintf(stdout,"creatinf file %s\n", fname.c_str());
+			fprintf(stdout,"creating file %s\n", fname.c_str());
+#endif
 
 		FILE* f = fopen(fname.c_str(), "w");
 		if (f == NULL) {
 			*result = NULL;
 			s = IOError(fname, errno);
 		} else {
+
+			//fprintf(stdout,"creating file 1%s\n", fname.c_str());
 			*result = new PosixWritableFile(fname, f);
 		}
 		return s;
@@ -685,28 +701,62 @@ public:
 	virtual Status GetChildren(const std::string& dir,
 			std::vector<std::string>* result) {
 		result->clear();
+
+#ifdef _NVMDEBUG
+		fprintf(stdout, "----------------------------\n");
+#endif
+
+#ifdef _USE_NVM
+		int count=0, i=0;
+
+		char **list = get_object_name_list(0, &count);
+
+		for(i=0; i< count; i++){
+			list[i] = list[i] + strlen(dir.c_str()) + 1;
+			std::string entry(list[i]);
+			result->push_back(entry);
+#ifdef _NVMDEBUG
+			fprintf(stdout, "GetChildren1: filename %s\n", entry.c_str());
+#endif
+		}
+
+#ifdef _NVMDEBUG
+		fprintf(stdout, "----------------------------\n");
+#endif
+
+#else
 		DIR* d = opendir(dir.c_str());
 		if (d == NULL) {
 			return IOError(dir, errno);
 		}
+
 		struct dirent* entry;
 		while ((entry = readdir(d)) != NULL) {
 			result->push_back(entry->d_name);
-			//fprintf(stdout, "GetChildren: filename %s\n", entry->d_name);
+#ifdef _NVMDEBUG
+			fprintf(stdout, "GetChildren: filename %s\n", entry->d_name);
+#endif
 		}
+#ifdef _NVMDEBUG
+		fprintf(stdout, "----------------------------\n");
+#endif
 		closedir(d);
+#endif
+
 		return Status::OK();
 	}
 
 	virtual Status DeleteFile(const std::string& fname) {
 		Status result;
 
+#ifdef _NVMDEBUG
 		fprintf(stdout,"DeleteFile filename %s\n", fname.c_str());
-#ifdef _USE_NVM
-		if(check_if_enable(fname.c_str())) {
+#endif
 
-			//nvcommitsz((char *)fname.c_str(), 0);
-		}
+#ifdef _USE_NVM
+		//if(check_if_enable(fname.c_str())) {
+		nvdelete((char *)fname.c_str(), 0);
+		//}
 #endif
 		if (unlink(fname.c_str()) != 0) {
 			result = IOError(fname, errno);
@@ -745,13 +795,17 @@ public:
 	virtual Status RenameFile(const std::string& src, const std::string& target) {
 		Status result;
 
-		//fprintf(stderr, "RenameFile : src.c_str() %s,
-		//target.c_str() %s \n",src.c_str(), target.c_str());
+
 
 #ifdef _USE_NVM
-		/*if(check_if_enable(src.c_str()) || check_if_enable(target.c_str()) ) {
+		if(check_if_enable(src.c_str()) || check_if_enable(target.c_str()) ) {
+
+			//					"target.c_str() %s \n",src.c_str(), target.c_str());
 			nv_renameobj((char *)src.c_str(), (char *)target.c_str());
-		}*/
+			return result;
+		}
+
+		//nv_renameobj((char *)src.c_str(), (char *)target.c_str());
 
 		//if(check_if_enable(src.c_str())) {
 		//fprintf(stdout,"RenameFile filename %s\n", src.c_str());
@@ -771,7 +825,7 @@ public:
 
 #ifdef _USE_NVM
 		//if(check_if_enable(fname.c_str())) {
-			//return result;
+		//return result;
 		//}
 #endif
 

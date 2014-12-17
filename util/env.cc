@@ -84,7 +84,7 @@ Status ReadFileToString(Env* env, const std::string& fname, std::string* data) {
       break;
     }
 
-    //fprintf(stdout, "fragment.data() %s \n", fragment.data());	
+    //fprintf(stdout, "fragment.data() %s \n", fragment.data());
 
     data->append(fragment.data(), fragment.size());
     if (fragment.empty()) {

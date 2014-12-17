@@ -301,6 +301,8 @@ Status DBImpl::Recover(VersionEdit* edit) {
 		}
 	}
 
+	fprintf(stdout, "Starting recovery\n");
+
 	s = versions_->Recover();
 	if (s.ok()) {
 		SequenceNumber max_sequence(0);
@@ -347,7 +349,6 @@ Status DBImpl::Recover(VersionEdit* edit) {
 		std::sort(logs.begin(), logs.end());
 		for (size_t i = 0; i < logs.size(); i++) {
 
-			//fprintf(stdout,"Logfile %s \n", logs[i].c_str());
 			s = RecoverLogFile(logs[i], edit, &max_sequence);
 
 			// The previous incarnation may not have written any MANIFEST
@@ -362,6 +363,7 @@ Status DBImpl::Recover(VersionEdit* edit) {
 			}
 		}
 	}
+	fprintf(stdout, "Ending recovery\n");
 
 	return s;
 }
@@ -407,6 +409,8 @@ Status DBImpl::RecoverLogFile(uint64_t log_number,
 			0/*initial_offset*/);
 	Log(options_.info_log, "Recovering log #%llu",
 			(unsigned long long) log_number);
+
+	fprintf(stdout, "recovering from logfile %s\n", fname.c_str());
 
 	// Read all the records and add to a memtable
 	std::string scratch;
@@ -1478,6 +1482,8 @@ Status DB::Open(const Options& options, const std::string& dbname,
 			impl->DeleteObsoleteFiles();
 			impl->MaybeScheduleCompaction();
 		}
+		//fprintf(stdout,"Recover succeeded \n");
+
 	}else {
 		fprintf(stdout,"Recover failed \n");
 	}

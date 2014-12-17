@@ -48,18 +48,18 @@
 //      heapprofile -- Dump a heap profile (if supported by this port)
 static const char* FLAGS_benchmarks =
     "fillseq,"
-    //"fillsync,"
-    //"fillrandom,"
-    //"overwrite,"
-    //"readrandom,"
-    //"readrandom,"  // Extra run to allow previous compactions to quiesce
-	//"readseq,"
-    //"readreverse,"
-    //"compact,"
-    //"readrandom,"
+    "fillsync,"
+    "fillrandom,"
+    //"fill100K,"
+    "overwrite,"
+    "readrandom,"
+    "readrandom,"  // Extra run to allow previous compactions to quiesce
+    "readseq,"
+    "readreverse,"
+    "compact,"
+    "readrandom,"
     //"readseq,"
     //"readreverse,"
-    //"fill100K,"
     /*"crc32c,"
     "snappycomp,"
     "snappyuncomp,"
@@ -67,7 +67,7 @@ static const char* FLAGS_benchmarks =
     ;
 
 // Number of key/values to place in database
-static int FLAGS_num = 1000000;
+static int FLAGS_num = 250000;
 
 // Number of read operations to do.  If negative, do FLAGS_num reads.
 static int FLAGS_reads = -1;
@@ -104,6 +104,7 @@ static int FLAGS_bloom_bits = -1;
 // flag and also specify a benchmark that wants a fresh database, that
 // benchmark will fail.
 static bool FLAGS_use_existing_db = false;
+//static bool FLAGS_use_existing_db = true;
 
 // Use the db with the following name.
 static const char* FLAGS_db = NULL;
@@ -449,7 +450,8 @@ class Benchmark {
       int num_threads = FLAGS_threads;
 
       if (name == Slice("fillseq")) {
-        fresh_db = true;
+        //fresh_db = true;
+    	 fresh_db = false;
         method = &Benchmark::WriteSeq;
       } else if (name == Slice("fillbatch")) {
         fresh_db = true;
@@ -532,6 +534,8 @@ class Benchmark {
         RunBenchmark(num_threads, name, method);
       }
     }
+
+    PrintStats("leveldb.stats");
   }
 
  private:
@@ -737,6 +741,11 @@ class Benchmark {
         bytes += value_size_ + strlen(key);
         thread->stats.FinishedSingleOp();
       }
+
+      if( i == num_/2) {
+    	  //assert(0);
+      }
+
       s = db_->Write(write_options_, &batch);
       if (!s.ok()) {
         fprintf(stderr, "put error: %s\n", s.ToString().c_str());
@@ -744,6 +753,7 @@ class Benchmark {
         exit(1);
       }
     }
+    fprintf(stdout,"bytes written %u\n", bytes);
     thread->stats.AddBytes(bytes);
   }
 
@@ -757,6 +767,7 @@ class Benchmark {
       ++i;
     }
     delete iter;
+    fprintf(stdout,"bytes read %u\n", bytes);
     thread->stats.AddBytes(bytes);
   }
 
@@ -930,6 +941,11 @@ class Benchmark {
 }  // namespace leveldb
 
 int main(int argc, char** argv) {
+
+#ifdef _USE_NVM
+ nvinit_(0);
+#endif;
+
   FLAGS_write_buffer_size = leveldb::Options().write_buffer_size;
   FLAGS_open_files = leveldb::Options().max_open_files;
   std::string default_db_path;
