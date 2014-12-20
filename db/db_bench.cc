@@ -52,12 +52,12 @@ static const char* FLAGS_benchmarks =
     "fillrandom,"
     //"fill100K,"
     "overwrite,"
-    "readrandom,"
+/*    "readrandom,"
     "readrandom,"  // Extra run to allow previous compactions to quiesce
     "readseq,"
     "readreverse,"
     "compact,"
-    "readrandom,"
+    "readrandom,"*/
     //"readseq,"
     //"readreverse,"
     /*"crc32c,"
