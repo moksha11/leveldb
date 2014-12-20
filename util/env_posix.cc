@@ -92,6 +92,7 @@ public:
 			unsigned long ref;
 			base_length = 1024*1024*4;
 			base_address = nvalloc_(base_length, (char *)fname.c_str(), 0);
+			memset(base_address, 0, base_length);
 #ifdef _NVMDEBUG
 			fprintf(stderr,"creating nv_objname %s, address %lu\n",nv_objname, (unsigned long)base_address);
 #endif
@@ -162,7 +163,7 @@ private:
 	std::string filename_;
 	FILE* file_;
 #ifdef _USE_NVM
-	void *pvptr=NULL;
+	//void *pvptr=NULL;
 	char nv_objname[255];
 	NVMSequentialFile *nvmseqfile;
 #endif

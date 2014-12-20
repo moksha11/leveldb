@@ -52,12 +52,12 @@ static const char* FLAGS_benchmarks =
     "fillrandom,"
     //"fill100K,"
     "overwrite,"
-    "readrandom,"
-    "readrandom,"  // Extra run to allow previous compactions to quiesce
-    "readseq,"
-    "readreverse,"
-    "compact,"
-    "readrandom,"
+    //"readrandom,"
+    //"readrandom,"  // Extra run to allow previous compactions to quiesce
+    //"readseq,"
+    //"readreverse,"
+    //"compact,"
+    //"readrandom,"
     //"readseq,"
     //"readreverse,"
     /*"crc32c,"
@@ -67,7 +67,7 @@ static const char* FLAGS_benchmarks =
     ;
 
 // Number of key/values to place in database
-static int FLAGS_num = 250000;
+static int FLAGS_num = 1000000;
 
 // Number of read operations to do.  If negative, do FLAGS_num reads.
 static int FLAGS_reads = -1;
@@ -234,7 +234,7 @@ class Stats {
       else if (next_report_ < 100000) next_report_ += 10000;
       else if (next_report_ < 500000) next_report_ += 50000;
       else                            next_report_ += 100000;
-      fprintf(stderr, "... finished %d ops%30s\r", done_, "");
+      //fprintf(stderr, "... finished %d ops%30s\r", done_, "");
       fflush(stderr);
     }
   }
@@ -943,7 +943,7 @@ class Benchmark {
 int main(int argc, char** argv) {
 
 #ifdef _USE_NVM
- nvinit_(0);
+ nvinit_(500);
 #endif;
 
   FLAGS_write_buffer_size = leveldb::Options().write_buffer_size;

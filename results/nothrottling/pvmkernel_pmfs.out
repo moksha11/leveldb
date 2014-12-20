@@ -1,0 +1,120 @@
+make: Nothing to be done for `default'.
+LevelDB:    version 1.18
+Date:       Sat Dec 20 18:21:00 2014
+CPU:        16 * Intel(R) Xeon(R) CPU           X5560  @ 2.80GHz
+CPUCache:   8192 KB
+Keys:       16 bytes each
+Values:     100 bytes each (50 bytes after compression)
+Entries:    1000000
+RawSize:    110.6 MB (estimated)
+FileSize:   62.9 MB (estimated)
+WARNING: Snappy compression is not enabled
+------------------------------------------------
+Starting recovery
+------------
+Ending recovery
+bytes written 116000000
+fillseq      :       1.815 micros/op;   60.9 MB/s
+Starting recovery
+------------
+Ending recovery
+bytes written 116000
+fillsync     :       7.645 micros/op;   14.5 MB/s (1000 ops)
+Starting recovery
+------------
+Ending recovery
+bytes written 116000000
+fillrandom   :       2.506 micros/op;   44.1 MB/s
+bytes written 116000000
+overwrite    :       3.050 micros/op;   36.3 MB/s
+
+                               Compactions
+Level  Files Size(MB) Time(sec) Read(MB) Write(MB)
+--------------------------------------------------
+  0        4       12         1        0       212
+  1       11       19         2      316       286
+  2       36       69         2      458       376
+
+	Command being timed: "./db_bench --threads=1"
+	User time (seconds): 11.78
+	System time (seconds): 0.68
+	Percent of CPU this job got: 164%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.55
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 9917040
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 624369
+	Voluntary context switches: 1367
+	Involuntary context switches: 1166
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+make: Nothing to be done for `default'.
+LevelDB:    version 1.18
+Date:       Sat Dec 20 18:21:59 2014
+CPU:        16 * Intel(R) Xeon(R) CPU           X5560  @ 2.80GHz
+CPUCache:   8192 KB
+Keys:       16 bytes each
+Values:     100 bytes each (50 bytes after compression)
+Entries:    1000000
+RawSize:    110.6 MB (estimated)
+FileSize:   62.9 MB (estimated)
+WARNING: Snappy compression is not enabled
+------------------------------------------------
+Starting recovery
+------------
+Ending recovery
+bytes written 116000000
+fillseq      :       1.683 micros/op;   65.7 MB/s
+Starting recovery
+------------
+Ending recovery
+bytes written 116000
+fillsync     :      11.105 micros/op;   10.0 MB/s (1000 ops)
+Starting recovery
+------------
+Ending recovery
+bytes written 116000000
+fillrandom   :       2.469 micros/op;   44.8 MB/s
+bytes written 116000000
+overwrite    :       3.002 micros/op;   36.9 MB/s
+
+                               Compactions
+Level  Files Size(MB) Time(sec) Read(MB) Write(MB)
+--------------------------------------------------
+  0        3        9         1        0       212
+  1       15       25         2      328       296
+  2       36       69         2      442       365
+
+	Command being timed: "./db_bench --threads=1"
+	User time (seconds): 11.38
+	System time (seconds): 0.58
+	Percent of CPU this job got: 163%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.33
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 9783088
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 614998
+	Voluntary context switches: 1504
+	Involuntary context switches: 1142
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 8
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
