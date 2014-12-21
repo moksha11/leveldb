@@ -25,7 +25,7 @@
 #include "util/posix_logger.h"
 
 //#define _NVMDEBUG
-//#define _USE_NVM
+#define _USE_NVM
 #ifdef _USE_NVM
 #include <nv_map.h>
 #include <c_io.h>
