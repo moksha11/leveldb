@@ -137,9 +137,35 @@ public:
 
 	}
 
-	virtual Status Close() { return Status::OK(); }
-	virtual Status Flush() { return Status::OK(); }
-	virtual Status Sync() { return Status::OK(); }
+	virtual Status Close() { 
+
+		if(objid) {
+			nvcommitsz_id(objid, nvmwriteoff);
+		}else {
+			nvcommitsz(nv_objname, nvmwriteoff);
+		}
+		return Status::OK(); 
+	}
+
+	virtual Status Flush() { 
+
+		if(objid) {
+			nvcommitsz_id(objid, nvmwriteoff);
+		}else {
+			nvcommitsz(nv_objname, nvmwriteoff);
+		}
+		return Status::OK(); 
+	}
+
+	virtual Status Sync() { 
+
+		if(objid) {
+			nvcommitsz_id(objid, nvmwriteoff);
+		}else {
+			nvcommitsz(nv_objname, nvmwriteoff);
+		}
+		return Status::OK(); 
+	}
 
 	virtual Status Append(const Slice& slice) {
 
@@ -148,11 +174,11 @@ public:
 		nvmwriteoff = nvmwriteoff + slice.size();
 		//fprintf(stderr,"nvm write obj %s %lu nvmoffset\n", nv_objname,  nvmwriteoff);
 
-		if(objid) {
+		/*if(objid) {
 			nvcommitsz_id(objid, nvmwriteoff);
 		}else {
 			nvcommitsz(nv_objname, nvmwriteoff);
-		}
+		}*/
 		return Status::OK();
 	}
 
@@ -517,6 +543,9 @@ public:
 #ifdef _USE_NVM
 		//commit data here
 		//DeleteFile(filename_);
+		if(check_if_enable(filename_.c_str())) {
+			nvmwritefile->Flush();
+		}
 		return Status::OK();
 #else
 		if (fflush_unlocked(file_) != 0) {
@@ -562,9 +591,11 @@ public:
 		}
 #ifdef _USE_NVM
 		//sync data here
+		if(check_if_enable(filename_.c_str())) {
+			nvmwritefile->Sync();
+		}
 		return s;
 #else
-
 		if (fflush_unlocked(file_) != 0 ||
 				fdatasync(fileno(file_)) != 0) {
 			s = Status::IOError(filename_, strerror(errno));
