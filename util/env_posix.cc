@@ -71,6 +71,7 @@ public:
 	bool force_error_;
 	bool returned_partial_;
 	char nv_objname[255];
+	unsigned int objid;
 	void *base_address;
 	size_t base_length;
 	size_t nvmwriteoff;
@@ -91,13 +92,17 @@ public:
 		if(!readflag){
 			unsigned long ref;
 			base_length = 1024*1024*4;
-			base_address = nvalloc_(base_length, (char *)fname.c_str(), 0);
+			//base_address = nvalloc_(base_length, (char *)fname.c_str(), 0);
+			base_address = nvalloc_id(base_length, (char *)fname.c_str(), &objid);
 			memset(base_address, 0, base_length);
 #ifdef _NVMDEBUG
-			fprintf(stderr,"creating nv_objname %s, address %lu\n",nv_objname, (unsigned long)base_address);
+			fprintf(stderr,"creating nv_objname %s, address %lu, objid %u\n",
+							nv_objname, (unsigned long)base_address, objid);
 #endif
 		}else{
-			base_address = nvread_len((char *)fname.c_str(), 0, &base_length);
+			base_address = nvread_len((char *)fname.c_str(),objid, &base_length);
+			if(!base_address)
+				nvmwriteoff = 0;
 			nvmwriteoff = base_length;
 #ifdef _NVMDEBUG
 			fprintf(stderr,"nvread_len nv_objname %s, address %lu\n",nv_objname, (unsigned long)base_address);
@@ -142,7 +147,12 @@ public:
 		memcpy(base_address+nvmwriteoff, slice.data(), slice.size());
 		nvmwriteoff = nvmwriteoff + slice.size();
 		//fprintf(stderr,"nvm write obj %s %lu nvmoffset\n", nv_objname,  nvmwriteoff);
-		nvcommitsz(nv_objname, nvmwriteoff);
+
+		if(objid) {
+			nvcommitsz_id(objid, nvmwriteoff);
+		}else {
+			nvcommitsz(nv_objname, nvmwriteoff);
+		}
 		return Status::OK();
 	}
 
