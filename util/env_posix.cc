@@ -25,7 +25,7 @@
 #include "util/posix_logger.h"
 
 //#define _NVMDEBUG
-#define _USE_NVM
+//#define _USE_NVM
 #ifdef _USE_NVM
 #include <nv_map.h>
 #include <c_io.h>
@@ -76,8 +76,8 @@ public:
 	size_t base_length;
 	size_t nvmwriteoff;
 	size_t nvmreadoff;
-	pthread_mutex_t rd_mutex = PTHREAD_MUTEX_INITIALIZER;
-	pthread_mutex_t wr_mutex = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t rd_mutex; //= PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t wr_mutex; //= PTHREAD_MUTEX_INITIALIZER;
 	Status s;
 
 
@@ -88,8 +88,9 @@ public:
 		strcpy(nv_objname, (char *)fname.c_str());
 		nvmwriteoff = 0;
 		nvmreadoff = 0;
+  	    rd_mutex = PTHREAD_MUTEX_INITIALIZER;
+	    wr_mutex = PTHREAD_MUTEX_INITIALIZER;
 		//fprintf(stderr,"creating nv_objname %s\n",nv_objname);
-
 
 		if(!readflag){
 			unsigned long ref;
