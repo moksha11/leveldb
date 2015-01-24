@@ -50,7 +50,7 @@ static const char* FLAGS_benchmarks =
     "fillseq,"
     "fillsync,"
     "fillrandom,"
-    //"fill100K,"
+     //"fill100K,"
     "overwrite,"
     //"readrandom,"
     //"readrandom,"  // Extra run to allow previous compactions to quiesce
@@ -67,7 +67,7 @@ static const char* FLAGS_benchmarks =
     ;
 
 // Number of key/values to place in database
-static int FLAGS_num = 200000;
+static int FLAGS_num = 2000000;
 
 // Number of read operations to do.  If negative, do FLAGS_num reads.
 static int FLAGS_reads = -1;
@@ -76,7 +76,7 @@ static int FLAGS_reads = -1;
 static int FLAGS_threads = 1;
 
 // Size of each value
-static int FLAGS_value_size = 300;
+static int FLAGS_value_size = 500;
 
 // Arrange to generate values that shrink to this fraction of
 // their original size after compression
@@ -450,19 +450,23 @@ class Benchmark {
       int num_threads = FLAGS_threads;
 
       if (name == Slice("fillseq")) {
-        //fresh_db = true;
-    	 fresh_db = false;
-        method = &Benchmark::WriteSeq;
+         fresh_db = true;
+    	 //fresh_db = false;
+         method = &Benchmark::WriteSeq;
+	write_options_.sync = true;
       } else if (name == Slice("fillbatch")) {
         fresh_db = true;
         entries_per_batch_ = 1000;
         method = &Benchmark::WriteSeq;
+	write_options_.sync = true;
       } else if (name == Slice("fillrandom")) {
         fresh_db = true;
         method = &Benchmark::WriteRandom;
+	write_options_.sync = true;
       } else if (name == Slice("overwrite")) {
         fresh_db = false;
         method = &Benchmark::WriteRandom;
+		write_options_.sync = true;
       } else if (name == Slice("fillsync")) {
         fresh_db = true;
         num_ /= 1000;
@@ -943,7 +947,7 @@ class Benchmark {
 int main(int argc, char** argv) {
 
 #ifdef _USE_NVM
- nvinit_(500);
+nvinit_(500);
 #endif;
 
   FLAGS_write_buffer_size = leveldb::Options().write_buffer_size;

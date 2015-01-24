@@ -76,6 +76,8 @@ public:
 	size_t base_length;
 	size_t nvmwriteoff;
 	size_t nvmreadoff;
+	pthread_mutex_t rd_mutex = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t wr_mutex = PTHREAD_MUTEX_INITIALIZER;
 	Status s;
 
 
@@ -92,7 +94,11 @@ public:
 		if(!readflag){
 			unsigned long ref;
 			base_length = 1024*1024*4;
+			
+			//pthread_mutex_lock( &wr_mutex );
 			//base_address = nvalloc_(base_length, (char *)fname.c_str(), 0);
+			//pthread_mutex_unlock( &wr_mutex );
+
 			base_address = nvalloc_id(base_length, (char *)fname.c_str(), &objid);
 			memset(base_address, 0, base_length);
 #ifdef _NVMDEBUG
@@ -100,10 +106,14 @@ public:
 							nv_objname, (unsigned long)base_address, objid);
 #endif
 		}else{
+
+			pthread_mutex_lock( &rd_mutex );
 			base_address = nvread_len((char *)fname.c_str(),objid, &base_length);
 			if(!base_address)
 				nvmwriteoff = 0;
 			nvmwriteoff = base_length;
+			pthread_mutex_unlock( &rd_mutex );
+
 #ifdef _NVMDEBUG
 			fprintf(stderr,"nvread_len nv_objname %s, address %lu\n",nv_objname, (unsigned long)base_address);
 			fprintf(stderr,"creating nvmwriteoff %u\n",nvmwriteoff);
@@ -139,46 +149,67 @@ public:
 
 	virtual Status Close() { 
 
+		//pthread_mutex_lock( &wr_mutex );	
+		#if 0
 		if(objid) {
 			nvcommitsz_id(objid, nvmwriteoff);
 		}else {
 			nvcommitsz(nv_objname, nvmwriteoff);
 		}
+		#endif
+		//pthread_mutex_unlock( &wr_mutex );
 		return Status::OK(); 
 	}
 
 	virtual Status Flush() { 
 
+		#if 0
+		pthread_mutex_lock( &wr_mutex );
+		#endif
 		if(objid) {
 			nvcommitsz_id(objid, nvmwriteoff);
 		}else {
 			nvcommitsz(nv_objname, nvmwriteoff);
 		}
+		#if 0
+		pthread_mutex_unlock( &wr_mutex );
+		#endif	
 		return Status::OK(); 
 	}
 
 	virtual Status Sync() { 
 
+		#if 1
+		pthread_mutex_lock( &wr_mutex );
 		if(objid) {
 			nvcommitsz_id(objid, nvmwriteoff);
 		}else {
 			nvcommitsz(nv_objname, nvmwriteoff);
 		}
+		pthread_mutex_unlock( &wr_mutex );
+		#endif	
 		return Status::OK(); 
 	}
 
 	virtual Status Append(const Slice& slice) {
 
 		unsigned long ptr;
-		memcpy(base_address+nvmwriteoff, slice.data(), slice.size());
-		nvmwriteoff = nvmwriteoff + slice.size();
-		//fprintf(stderr,"nvm write obj %s %lu nvmoffset\n", nv_objname,  nvmwriteoff);
 
-		/*if(objid) {
+		size_t size =  slice.size();
+
+		memcpy(base_address+nvmwriteoff, slice.data(), size);
+		nvmwriteoff = nvmwriteoff + size;
+		//fprintf(stderr,"nvm write obj %s %lu nvmoffset\n", nv_objname,  nvmwriteoff);
+		pthread_mutex_lock( &wr_mutex );
+		if(objid) {
 			nvcommitsz_id(objid, nvmwriteoff);
 		}else {
 			nvcommitsz(nv_objname, nvmwriteoff);
-		}*/
+		}
+		pthread_mutex_unlock( &wr_mutex );
+		//nvsync(base_address+nvmwriteoff, size); 
+
+
 		return Status::OK();
 	}
 
@@ -244,7 +275,7 @@ public:
 
 #ifdef _NVMDEBUG
 		if(check_if_enable(filename_.c_str()))
-			fprintf(stdout, "reading offset fname%s: %u \n", filename_.c_str(), ftell(file_));
+			fprintf(stderr, "reading offset fname%s: %u \n", filename_.c_str(), ftell(file_));
 #endif
 
 		r= fread_unlocked(scratch, 1, n, file_);
@@ -513,7 +544,7 @@ public:
 
 #ifdef _NVMDEBUG
 		if(check_if_enable(filename_.c_str()))
-			fprintf(stdout, "writing offset fname%s: %u \n", filename_.c_str(), ftell(file_));
+			fprintf(stderr, "writing offset fname%s: %u \n", filename_.c_str(), ftell(file_));
 #endif
 
 		size_t r = fwrite_unlocked(data.data(), 1, data.size(), file_);
@@ -721,7 +752,7 @@ public:
 
 #ifdef _NVMDEBUG
 		if(check_if_enable(fname.c_str()))
-			fprintf(stdout,"creating file %s\n", fname.c_str());
+			fprintf(stderr,"creating file %s\n", fname.c_str());
 #endif
 
 		FILE* f = fopen(fname.c_str(), "w");
@@ -730,7 +761,7 @@ public:
 			s = IOError(fname, errno);
 		} else {
 
-			//fprintf(stdout,"creating file 1%s\n", fname.c_str());
+			//fprintf(stderr,"creating file 1%s\n", fname.c_str());
 			*result = new PosixWritableFile(fname, f);
 		}
 		return s;
@@ -745,7 +776,7 @@ public:
 		result->clear();
 
 #ifdef _NVMDEBUG
-		fprintf(stdout, "----------------------------\n");
+		fprintf(stderr, "----------------------------\n");
 #endif
 
 #ifdef _USE_NVM
@@ -758,12 +789,12 @@ public:
 			std::string entry(list[i]);
 			result->push_back(entry);
 #ifdef _NVMDEBUG
-			fprintf(stdout, "GetChildren1: filename %s\n", entry.c_str());
+			fprintf(stderr, "GetChildren1: filename %s\n", entry.c_str());
 #endif
 		}
 
 #ifdef _NVMDEBUG
-		fprintf(stdout, "----------------------------\n");
+		fprintf(stderr, "----------------------------\n");
 #endif
 
 #else
@@ -776,11 +807,11 @@ public:
 		while ((entry = readdir(d)) != NULL) {
 			result->push_back(entry->d_name);
 #ifdef _NVMDEBUG
-			fprintf(stdout, "GetChildren: filename %s\n", entry->d_name);
+			fprintf(stderr, "GetChildren: filename %s\n", entry->d_name);
 #endif
 		}
 #ifdef _NVMDEBUG
-		fprintf(stdout, "----------------------------\n");
+		fprintf(stderr, "----------------------------\n");
 #endif
 		closedir(d);
 #endif
@@ -792,7 +823,7 @@ public:
 		Status result;
 
 #ifdef _NVMDEBUG
-		fprintf(stdout,"DeleteFile filename %s\n", fname.c_str());
+		fprintf(stderr,"DeleteFile filename %s\n", fname.c_str());
 #endif
 
 #ifdef _USE_NVM
@@ -850,7 +881,7 @@ public:
 		//nv_renameobj((char *)src.c_str(), (char *)target.c_str());
 
 		//if(check_if_enable(src.c_str())) {
-		//fprintf(stdout,"RenameFile filename %s\n", src.c_str());
+		//fprintf(stderr,"RenameFile filename %s\n", src.c_str());
 		//return result;
 		//}
 #endif
