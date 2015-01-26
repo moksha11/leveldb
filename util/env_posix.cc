@@ -330,7 +330,7 @@ public:
 			char* scratch) const {
 
 		*result = Slice(reinterpret_cast<char*>(base_address+offset), n);
-		//fprintf(stderr,"read address %lu offset %u\n", (unsigned long)base_address, offset);
+		fprintf(stderr,"read address %lu offset %u\n", (unsigned long)base_address, offset);
 		return Status::OK();
 	}
 
@@ -874,9 +874,9 @@ public:
 #ifdef _USE_NVM
 		if(check_if_enable(src.c_str()) || check_if_enable(target.c_str()) ) {
 
-			//					"target.c_str() %s \n",src.c_str(), target.c_str());
+			//"target.c_str() %s \n",src.c_str(), target.c_str());
 			nv_renameobj((char *)src.c_str(), (char *)target.c_str());
-			return result;
+			//return result;
 		}
 
 		//nv_renameobj((char *)src.c_str(), (char *)target.c_str());
@@ -946,7 +946,7 @@ public:
 			*result = env;
 		} else {
 			char buf[100];
-			snprintf(buf, sizeof(buf), "/mnt/pmfs/leveldbtest-%d", int(geteuid()));
+			snprintf(buf, sizeof(buf), "/mnt/pmfs/leveldbtest-1000", int(geteuid()));
 			*result = buf;
 		}
 		// Directory may already exist

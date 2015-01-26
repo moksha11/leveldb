@@ -47,14 +47,14 @@
 //      sstables    -- Print sstable info
 //      heapprofile -- Dump a heap profile (if supported by this port)
 static const char* FLAGS_benchmarks =
-    "fillseq,"
-    "fillsync,"
-    "fillrandom,"
-     //"fill100K,"
-    "overwrite,"
+    //"fillseq,"
+    //"fillsync,"
+    //"fillrandom,"
+    //"fill100K,"
+    //"overwrite,"
     //"readrandom,"
     //"readrandom,"  // Extra run to allow previous compactions to quiesce
-    //"readseq,"
+    "readseq,"
     //"readreverse,"
     //"compact,"
     //"readrandom,"
@@ -103,11 +103,13 @@ static int FLAGS_bloom_bits = -1;
 // If true, do not destroy the existing database.  If you set this
 // flag and also specify a benchmark that wants a fresh database, that
 // benchmark will fail.
-static bool FLAGS_use_existing_db = false;
+static bool FLAGS_use_existing_db =false;
 //static bool FLAGS_use_existing_db = true;
 
 // Use the db with the following name.
 static const char* FLAGS_db = NULL;
+
+static bool FLAGS_killdb = true; //false;
 
 namespace leveldb {
 
@@ -450,8 +452,8 @@ class Benchmark {
       int num_threads = FLAGS_threads;
 
       if (name == Slice("fillseq")) {
-         fresh_db = true;
-    	 //fresh_db = false;
+         //fresh_db = true;
+    	 fresh_db = false;
          method = &Benchmark::WriteSeq;
 	write_options_.sync = true;
       } else if (name == Slice("fillbatch")) {
@@ -746,8 +748,10 @@ class Benchmark {
         thread->stats.FinishedSingleOp();
       }
 
-      if( i == num_/2) {
+      if(FLAGS_killdb && i == num_/2) {
+	  //fprintf(stderr, "asserting \n");	
     	  //assert(0);
+	  exit(0);
       }
 
       s = db_->Write(write_options_, &batch);
@@ -954,6 +958,10 @@ nvinit_(500);
   FLAGS_open_files = leveldb::Options().max_open_files;
   std::string default_db_path;
 
+  FLAGS_use_existing_db=1;
+  FLAGS_killdb = 0;		
+  FLAGS_threads=1;	
+
   for (int i = 1; i < argc; i++) {
     double d;
     int n;
@@ -968,6 +976,9 @@ nvinit_(500);
     } else if (sscanf(argv[i], "--use_existing_db=%d%c", &n, &junk) == 1 &&
                (n == 0 || n == 1)) {
       FLAGS_use_existing_db = n;
+    } else if (sscanf(argv[i], "--killdb=%d%c", &n, &junk) == 1 &&
+               (n == 0 || n == 1)) {
+      FLAGS_killdb = n;
     } else if (sscanf(argv[i], "--num=%d%c", &n, &junk) == 1) {
       FLAGS_num = n;
     } else if (sscanf(argv[i], "--reads=%d%c", &n, &junk) == 1) {
