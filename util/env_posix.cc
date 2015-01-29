@@ -25,7 +25,7 @@
 #include "util/posix_logger.h"
 
 //#define _NVMDEBUG
-//#define _USE_NVM
+#define _USE_NVM
 #ifdef _USE_NVM
 #include <nv_map.h>
 #include <c_io.h>
@@ -320,7 +320,7 @@ public:
 		returned_partial_(false)
 	{
 		strcpy(nv_objname, (char *)fname.c_str());
-		//fprintf(stderr,"nv_objname %s\n",nv_objname);
+		//fprintf(stderr,"NVMRandomNVMFile nv_objname %s\n",nv_objname);
 		base_address = nvread_len((char *)fname.c_str(), 0, &base_length);
 		nvmoffset = base_length;
 		pvptr=base_address;
@@ -330,7 +330,7 @@ public:
 			char* scratch) const {
 
 		*result = Slice(reinterpret_cast<char*>(base_address+offset), n);
-		fprintf(stderr,"read address %lu offset %u\n", (unsigned long)base_address, offset);
+		//fprintf(stderr,"NVMRandomNVMFile read address %lu offset %u\n", (unsigned long)base_address, offset);
 		return Status::OK();
 	}
 
