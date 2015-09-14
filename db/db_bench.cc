@@ -47,17 +47,17 @@
 //      sstables    -- Print sstable info
 //      heapprofile -- Dump a heap profile (if supported by this port)
 static const char* FLAGS_benchmarks =
-    //"fillseq,"
-    //"fillsync,"
-    //"fillrandom,"
+    "fillseq,"
+    "fillsync,"
+    "fillrandom,"
     //"fill100K,"
-    //"overwrite,"
+    "overwrite,"
     //"readrandom,"
     //"readrandom,"  // Extra run to allow previous compactions to quiesce
     "readseq,"
     //"readreverse,"
     //"compact,"
-    //"readrandom,"
+    "readrandom,"
     //"readseq,"
     //"readreverse,"
     /*"crc32c,"
@@ -67,7 +67,7 @@ static const char* FLAGS_benchmarks =
     ;
 
 // Number of key/values to place in database
-static int FLAGS_num = 2000000;
+static int FLAGS_num = 100000;
 
 // Number of read operations to do.  If negative, do FLAGS_num reads.
 static int FLAGS_reads = -1;
@@ -109,7 +109,7 @@ static bool FLAGS_use_existing_db =false;
 // Use the db with the following name.
 static const char* FLAGS_db = NULL;
 
-static bool FLAGS_killdb = true; //false;
+static bool FLAGS_killdb = false;
 
 namespace leveldb {
 
@@ -958,9 +958,9 @@ nvinit_(500);
   FLAGS_open_files = leveldb::Options().max_open_files;
   std::string default_db_path;
 
-  FLAGS_use_existing_db=1;
-  FLAGS_killdb = 0;		
-  FLAGS_threads=1;	
+  //FLAGS_use_existing_db=1;
+  //FLAGS_killdb = 0;		
+  //FLAGS_threads=1;	
 
   for (int i = 1; i < argc; i++) {
     double d;

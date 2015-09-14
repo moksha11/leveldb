@@ -78,6 +78,7 @@ public:
 	size_t nvmreadoff;
 	pthread_mutex_t rd_mutex; //= PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutex_t wr_mutex; //= PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t append_mutex; //= PTHREAD_MUTEX_INITIALIZER;
 	Status s;
 
 
@@ -90,17 +91,18 @@ public:
 		nvmreadoff = 0;
   	    rd_mutex = PTHREAD_MUTEX_INITIALIZER;
 	    wr_mutex = PTHREAD_MUTEX_INITIALIZER;
+	    append_mutex = PTHREAD_MUTEX_INITIALIZER;
 		//fprintf(stderr,"creating nv_objname %s\n",nv_objname);
 
 		if(!readflag){
 			unsigned long ref;
 			base_length = 1024*1024*4;
 			
-			//pthread_mutex_lock( &wr_mutex );
 			//base_address = nvalloc_(base_length, (char *)fname.c_str(), 0);
-			//pthread_mutex_unlock( &wr_mutex );
-
+			pthread_mutex_lock( &wr_mutex );
 			base_address = nvalloc_id(base_length, (char *)fname.c_str(), &objid);
+			pthread_mutex_unlock( &wr_mutex );
+
 			memset(base_address, 0, base_length);
 #ifdef _NVMDEBUG
 			fprintf(stderr,"creating nv_objname %s, address %lu, objid %u\n",
@@ -164,7 +166,7 @@ public:
 
 	virtual Status Flush() { 
 
-		#if 0
+		#if 1
 		pthread_mutex_lock( &wr_mutex );
 		#endif
 		if(objid) {
@@ -172,7 +174,7 @@ public:
 		}else {
 			nvcommitsz(nv_objname, nvmwriteoff);
 		}
-		#if 0
+		#if 1
 		pthread_mutex_unlock( &wr_mutex );
 		#endif	
 		return Status::OK(); 
@@ -180,8 +182,9 @@ public:
 
 	virtual Status Sync() { 
 
-		#if 1
+		#if 0
 		pthread_mutex_lock( &wr_mutex );
+			
 		if(objid) {
 			nvcommitsz_id(objid, nvmwriteoff);
 		}else {
@@ -201,13 +204,13 @@ public:
 		memcpy(base_address+nvmwriteoff, slice.data(), size);
 		nvmwriteoff = nvmwriteoff + size;
 		//fprintf(stderr,"nvm write obj %s %lu nvmoffset\n", nv_objname,  nvmwriteoff);
-		pthread_mutex_lock( &wr_mutex );
+		pthread_mutex_lock( &append_mutex );
 		if(objid) {
 			nvcommitsz_id(objid, nvmwriteoff);
 		}else {
 			nvcommitsz(nv_objname, nvmwriteoff);
 		}
-		pthread_mutex_unlock( &wr_mutex );
+		pthread_mutex_unlock( &append_mutex );
 		//nvsync(base_address+nvmwriteoff, size); 
 
 
