@@ -52,8 +52,7 @@ bool Reader::SkipToInitialBlock() {
       return false;
     }
   }
-
-  return true;
+ return true;
 }
 
 bool Reader::ReadRecord(Slice* record, std::string* scratch) {
@@ -62,7 +61,6 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch) {
       return false;
     }
   }
-
   scratch->clear();
   record->clear();
   bool in_fragmented_record = false;
@@ -139,7 +137,6 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch) {
           scratch->clear();
         }
         return false;
-
       case kBadRecord:
         if (in_fragmented_record) {
           ReportCorruption(scratch->size(), "error in middle of record");

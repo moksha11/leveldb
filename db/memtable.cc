@@ -66,6 +66,18 @@ class MemTableIterator: public Iterator {
 
   virtual Status status() const { return Status::OK(); }
 
+
+  void * operator new (size_t size)
+   {
+       assert (size);
+       return malloc(size);
+   }
+   void operator delete (void * mem)
+   {
+       if (mem)
+           free(mem);
+   }
+
  private:
   MemTable::Table::Iterator iter_;
   std::string tmp_;       // For passing to EncodeKey

@@ -24,7 +24,7 @@
 #include "util/mutexlock.h"
 #include "util/posix_logger.h"
 
-//#define _NVMDEBUG
+#define _NVMDEBUG
 #define _USE_NVM
 #ifdef _USE_NVM
 #include <nv_map.h>
@@ -949,7 +949,7 @@ public:
 			*result = env;
 		} else {
 			char buf[100];
-			snprintf(buf, sizeof(buf), "/mnt/pmfs/leveldbtest-1000", int(geteuid()));
+			snprintf(buf, sizeof(buf), "/tmp/ramdisk/leveldbtest-1000", int(geteuid()));
 			*result = buf;
 		}
 		// Directory may already exist

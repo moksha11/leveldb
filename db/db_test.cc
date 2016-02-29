@@ -2153,7 +2153,7 @@ void BM_LogAndApply(int iters, int num_base_files) {
 int main(int argc, char** argv) {
 
 #ifdef _USE_NVM
- nvinit_(0);
+ //nvinit_(0);
 #endif;
 
 

@@ -67,7 +67,7 @@ static const char* FLAGS_benchmarks =
     ;
 
 // Number of key/values to place in database
-static int FLAGS_num = 150000;
+static int FLAGS_num = 1000000;
 
 // Number of read operations to do.  If negative, do FLAGS_num reads.
 static int FLAGS_reads = -1;
@@ -76,7 +76,7 @@ static int FLAGS_reads = -1;
 static int FLAGS_threads = 1;
 
 // Size of each value
-static int FLAGS_value_size = 500;
+static int FLAGS_value_size = 1024;
 
 // Arrange to generate values that shrink to this fraction of
 // their original size after compression
@@ -110,6 +110,9 @@ static bool FLAGS_use_existing_db =false;
 static const char* FLAGS_db = NULL;
 
 static bool FLAGS_killdb = false;
+
+//Total throuput of the benchmark
+static double tottput;
 
 namespace leveldb {
 
@@ -256,8 +259,12 @@ class Stats {
       // elapsed times.
       double elapsed = (finish_ - start_) * 1e-6;
       char rate[100];
-      snprintf(rate, sizeof(rate), "%6.1f MB/s",
-               (bytes_ / 1048576.0) / elapsed);
+			double tput=0;
+			
+			tput = (bytes_ / 1048576.0) / elapsed;	
+			tottput += tput;
+      snprintf(rate, sizeof(rate), "%6.1f MB/s %6.1f MB/s",
+               tput, tottput);
       extra = rate;
     }
     AppendWithSpace(&extra, message_);

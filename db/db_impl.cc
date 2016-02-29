@@ -1304,6 +1304,7 @@ Status DBImpl::MakeRoomForWrite(bool force) {
 	assert(!writers_.empty());
 	bool allow_delay = !force;
 	Status s;
+
 	while (true) {
 		if (!bg_error_.ok()) {
 			// Yield previous error
